@@ -11,6 +11,9 @@ def pc_normalize(pc):
     pc = pc - centroid
     m = np.max(np.sqrt(np.sum(pc**2, axis=1)))
     pc = pc / m
+    projected_values = np.sum(pc, axis = 1)
+    order = np.argsort(projected_values)
+    pc = pc[order, :]
     return pc
 
 def farthest_point_sample(point, npoint):
@@ -69,12 +72,18 @@ class ModelNetDataLoader(Dataset):
             point_set, cls = self.cache[index]
         else:
             fn = self.datapath[index]
+            #print("fn", fn)
             cls = self.classes[self.datapath[index][0]]
             cls = np.array([cls]).astype(np.int32)
+            #print("cls", cls)
             point_set = np.loadtxt(fn[1], delimiter=',').astype(np.float32)
+            #with open("details.txt", 'a') as f:
+              #f.writelines(str(fn[1]) + " " + str(cls[0]) + " " +  str(point_set[0][0]) + " " +str(point_set[0][1])+"\n")
+            #print("point_set", point_set)
             if self.uniform:
                 point_set = farthest_point_sample(point_set, self.npoints)
             else:
+                #print("Shape: ", point_set.shape, "size: ", self.npoints)
                 point_set = point_set[0:self.npoints,:]
 
             point_set[:, 0:3] = pc_normalize(point_set[:, 0:3])
