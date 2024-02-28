@@ -30,7 +30,7 @@ class PSNv1(nn.Module):
         assert len(mlp) > 1, "The number of MLP layers must greater than 1 !"
 
         self.mlp_convs.append(
-            nn.Conv1d(in_channels=4, out_channels=mlp[0], kernel_size=1))
+            nn.Conv1d(in_channels=5, out_channels=mlp[0], kernel_size=1))
         self.mlp_bns.append(nn.BatchNorm1d(num_features=mlp[0]))
 
         for i in range(len(mlp)-1):
@@ -73,13 +73,9 @@ class PSNv1(nn.Module):
         r = torch.cdist(coordinate, self.origin_point, 2).squeeze_()
         th = torch.acos(coordinate[:, :, 2] / r)
         fi = torch.atan2(coordinate[:, :, 1], coordinate[:, :, 0])
-        projected = torch.sum(coordinate, 2)/math.sqrt(3)
 
-        #coordinate2 = torch.cat(
-            #[coordinate, th.unsqueeze_(2), fi.unsqueeze_(2), projected.unsqueeze_(2)], -1)
-        
         coordinate2 = torch.cat(
-            [coordinate, projected.unsqueeze_(2)], -1)
+            [coordinate, th.unsqueeze_(2), fi.unsqueeze_(2)], -1)
 
         x = coordinate2.transpose(2, 1)  # Channel First [B, 5, m]
 
@@ -149,7 +145,7 @@ class PSN(nn.Module):
         assert len(mlp) > 1, "The number of MLP layers must greater than 1 !"
 
         self.mlp_convs.append(
-            nn.Linear(in_features=4, out_features=mlp[0], bias=False))
+            nn.Linear(in_features=5, out_features=mlp[0], bias=False))
         self.mlp_bns.append(nn.BatchNorm1d(num_features=mlp[0]))
 
         for i in range(len(mlp)-1):
@@ -192,11 +188,8 @@ class PSN(nn.Module):
         r = torch.cdist(coordinate, self.origin_point, 2).squeeze_()
         th = torch.acos(coordinate[:, :, 2] / r)
         fi = torch.atan2(coordinate[:, :, 1], coordinate[:, :, 0])
-        projected = torch.sum(coordinate, 2)/math.sqrt(3)
 
-        #coordinate2 = torch.cat([coordinate, th.unsqueeze_(2), fi.unsqueeze_(2), projected.unsqueeze_(2)], -1)
-        coordinate2 = torch.cat([coordinate, projected.unsqueeze_(2)], -1)
-        
+        coordinate2 = torch.cat([coordinate, th.unsqueeze_(2), fi.unsqueeze_(2)], -1)
 
         x = coordinate2
 
